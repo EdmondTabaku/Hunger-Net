@@ -2,6 +2,7 @@ package backend.security;
 
 import backend.model.User;
 import backend.repository.UserRepository;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
