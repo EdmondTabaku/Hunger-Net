@@ -16,6 +16,8 @@ import backend.repository.UserRepository;
 import backend.service.RestaurantService;
 import backend.service.UserService;
 import backend.util.DtoConversion;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
     private final UserDetailRepository userDetailRepository;
     private final RoleRepository roleRepository;
@@ -59,6 +62,7 @@ public class UserServiceImpl implements UserService {
                 user = userOptional.get();
                 isUpdating = true;
             } else {
+                logger.error("User not found");
                 throw new NullPointerException("User not found");
             }
             Optional<UserDetail> userDetailOptional = userDetailRepository.findByUserId(user.getId());
@@ -144,7 +148,7 @@ public class UserServiceImpl implements UserService {
             }
         } else {
 
-            // Adding role CLIENT to the user if the userDto doesn't ha
+            // Adding role CLIENT to the user if the userDto doesn't have any roles
             Optional<Role> roleOptional = roleRepository.findByName("ROLE_CLIENT");
             if (roleOptional.isPresent()){
                 Role client = roleOptional.get();
@@ -155,6 +159,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
+        logger.info("Saved user with username: " + user.getUsername());
         return dtoConversion.convertUser(userRepository.save(user));
     }
 
@@ -173,6 +178,7 @@ public class UserServiceImpl implements UserService {
                     userRepository.findByUsernameAndIsDeleted(clientUsername, false).get().getId() == userOptional.get().getId()) {
                 user = userOptional.get();
             } else {
+                logger.error("User not found");
                 throw new NullPointerException("User not found");
             }
             Optional<UserDetail> userDetailOptional = userDetailRepository.findByUserId(user.getId());
@@ -241,6 +247,7 @@ public class UserServiceImpl implements UserService {
             throw new NullPointerException("Role not found");
         }
 
+        logger.info("Saved user with username: " + user.getUsername());
         return dtoConversion.convertClient(userRepository.save(user));
     }
 
@@ -295,6 +302,8 @@ public class UserServiceImpl implements UserService {
                 roleSet.add(role);
                 user.setRoles(roleSet);
 
+                logger.info("Added role " + role.getName() + " to user " + user.getUsername());
+
                 return dtoConversion.convertUser(userRepository.save(user));
             } else {
                 throw new NullPointerException("Role not found");
@@ -311,15 +320,17 @@ public class UserServiceImpl implements UserService {
         if (userOptional.isPresent()){
             User user = userOptional.get();
             user.setDeleted(true);
+            logger.info("Deleted user with username: " + user.getUsername());
             return dtoConversion.convertUser(userRepository.save(user));
         } else {
+            logger.error("User with id: " + userId + " not found");
             throw new NullPointerException("User not found");
         }
     }
 
 
     // Checking if a user with the given username exists
-    Boolean usernameExists(String username) {
+    public  Boolean usernameExists(String username) {
         if (userRepository.findByUsernameAndIsDeleted(username, false).isPresent()) {
             return true;
         }
@@ -327,7 +338,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // Checking if a UserDto has ROLE_MANAGER
-    Boolean isManager(UserDto userDto) {
+    public Boolean isManager(UserDto userDto) {
         if (userDto.getRoles() != null) {
             for (RoleDto role : userDto.getRoles()) {
                 if (role.getName().contains("ROLE_MANAGER")) {
@@ -339,7 +350,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // Adding roles from a RoleDto set to a Role set
-    void addRoles(Set<Role> roleList, Set<RoleDto> roleDtoList) {
+    public void addRoles(Set<Role> roleList, Set<RoleDto> roleDtoList) {
         for (RoleDto roleDto : roleDtoList) {
             Optional<Role> roleOptional = roleRepository.findByName(roleDto.getName());
             if(roleOptional.isPresent()){

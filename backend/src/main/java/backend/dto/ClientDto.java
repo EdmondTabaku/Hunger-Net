@@ -1,10 +1,13 @@
 package backend.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ClientDto {
 
     private Integer id;
     private String username;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private UserDetailDto userDetail;
 

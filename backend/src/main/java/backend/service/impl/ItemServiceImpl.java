@@ -12,6 +12,8 @@ import backend.service.ItemService;
 import backend.service.MenuService;
 import backend.util.DtoConversion;
 import backend.util.GetterUtil;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 public class ItemServiceImpl implements ItemService {
 
+    private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
     private final ItemRepository itemRepository;
     private final MenuRepository menuRepository;
     private final MenuService menuService;
@@ -49,6 +52,7 @@ public class ItemServiceImpl implements ItemService {
             if (itemOptional.isPresent()){
                 item = itemOptional.get();
             } else {
+                logger.error("Item not found");
                 throw new NullPointerException("Item not found");
             }
         }
@@ -84,12 +88,14 @@ public class ItemServiceImpl implements ItemService {
                 menu.setItemList(itemList);
                 item.setMenu(menu);
             }else {
+                logger.error("Menu not found");
                 throw new NullPointerException("Menu not found");
             }
         }else {
             throw new InvalidRequestException("Menu is invalid");
         }
 
+        logger.info("Saved item " + item.getName() + " in menu " + item.getMenu().getName());
         return dtoConversion.convertItem(itemRepository.save(item));
     }
 
@@ -125,8 +131,11 @@ public class ItemServiceImpl implements ItemService {
         if (itemOptional.isPresent()){
             Item item = itemOptional.get();
             item.setDeleted(true);
+
+            logger.info("Deleted item with id:" + id);
             return dtoConversion.convertItem(itemRepository.save(item));
         } else {
+            logger.error("Item not found");
             throw new NullPointerException("Item not found");
         }
     }

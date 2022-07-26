@@ -12,6 +12,8 @@ import backend.repository.UserRepository;
 import backend.service.RestaurantService;
 import backend.util.DtoConversion;
 import backend.util.ValidationUtil;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class RestaurantServiceImpl implements RestaurantService {
+
+    private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
     private final RestaurantRepository restaurantRepository;
     private final UserRepository userRepository;
     private final MenuRepository menuRepository;
@@ -46,6 +50,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                 restaurant = restaurantOptional.get();
             }
             else {
+                logger.error("Restaurant not found");
                 throw new NullPointerException("Restaurant not found");
             }
         }
@@ -59,6 +64,7 @@ public class RestaurantServiceImpl implements RestaurantService {
             throw new IllegalArgumentException("Restaurant name is invalid");
         }
 
+        logger.info("Saved restaurant with name: " + restaurant.getName());
         return dtoConversion.convertRestaurant(restaurantRepository.save(restaurant));
     }
 
@@ -118,8 +124,10 @@ public class RestaurantServiceImpl implements RestaurantService {
         if (restaurantOptional.isPresent()){
             Restaurant restaurant = restaurantOptional.get();
             restaurant.setDeleted(true);
+            logger.info("Deleted restaurant with name: " + restaurant.getName());
             return dtoConversion.convertRestaurant(restaurantRepository.save(restaurant));
         } else {
+            logger.info("Restaurant with id: " + restaurantId + " not found");
             throw new NullPointerException("Restaurant not found");
         }
     }

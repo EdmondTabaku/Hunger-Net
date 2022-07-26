@@ -11,6 +11,8 @@ import backend.service.OrderedItemService;
 import backend.util.DtoConversion;
 import backend.util.GetterUtil;
 import backend.util.ValidationUtil;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
 
+    private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final UserRepository userRepository;
@@ -57,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
                 if (orderOptional.get().getOrderDetail().getStatus().equalsIgnoreCase("created")) {
                     order = orderOptional.get();
                 } else {
+                    logger.error("Order not found");
                     throw new CustomRequestException("Order can not be updated");
                 }
             } else {
@@ -116,22 +120,24 @@ public class OrderServiceImpl implements OrderService {
             throw new InvalidRequestException("Order Detail is invalid");
         }
 
-        if (orderDto.getOrderedItemList() != null) {
-            for (OrderedItemDto orderedItemDto : orderDto.getOrderedItemList()){
-                orderedItemService.save(orderedItemDto);
-            }
-            order.setOrderedItemList(orderDto.getOrderedItemList()
-                    .stream().map(orderedItemDto -> {
-                        Optional<OrderedItem> orderedItemOptional = orderedItemRepository.findById(orderedItemDto.getId());
-                        if (orderedItemOptional.isPresent() &&
-                                orderedItemOptional.get().getOrder().getMenu().getId() == orderDto.getMenuId()) {
-                            return orderedItemOptional.get();
-                        } else {
-                            throw new NullPointerException("Ordered Item not found");
-                        }
-                    }).collect(Collectors.toList()));
-        }
+//        if (orderDto.getOrderedItemList() != null) {
+//            for (OrderedItemDto orderedItemDto : orderDto.getOrderedItemList()){
+//                orderedItemService.save(orderedItemDto);
+//            }
+//            order.setOrderedItemList(orderDto.getOrderedItemList()
+//                    .stream().map(orderedItemDto -> {
+//                        Optional<OrderedItem> orderedItemOptional = orderedItemRepository.findById(orderedItemDto.getId());
+//                        if (orderedItemOptional.isPresent() &&
+//                                orderedItemOptional.get().getOrder().getMenu().getId() == orderDto.getMenuId()) {
+//                            return orderedItemOptional.get();
+//                        } else {
+//                            throw new NullPointerException("Ordered Item not found");
+//                        }
+//                    }).collect(Collectors.toList()));
+//        }
 
+
+        logger.info("Order saved");
         return dtoConversion.convertOrder(orderRepository.save(order));
     }
 
@@ -209,6 +215,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new CustomRequestException("You can not set this status");
             }
 
+            logger.info("Changed order status of order with id: " + orderId + " to " + status);
             return dtoConversion.convertOrder(orderRepository.save(order));
 
         } else {
@@ -224,8 +231,10 @@ public class OrderServiceImpl implements OrderService {
         if (orderOptional.isPresent()){
             Order order = orderOptional.get();
             order.setDeleted(true);
+            logger.info("Deleted order with id: " + id);
             return dtoConversion.convertOrder(orderRepository.save(order));
         } else {
+            logger.error("Order not found");
             throw new NullPointerException("Order not found");
         }
     }

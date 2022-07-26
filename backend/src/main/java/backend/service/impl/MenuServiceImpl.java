@@ -1,20 +1,18 @@
 package backend.service.impl;
 
-import backend.dto.ItemDto;
 import backend.dto.MenuDto;
-import backend.exception.CustomRequestException;
 import backend.exception.InvalidRequestException;
-import backend.model.Item;
 import backend.model.Menu;
 import backend.model.Restaurant;
 import backend.repository.ItemRepository;
 import backend.repository.MenuRepository;
 import backend.repository.RestaurantRepository;
-import backend.repository.UserRepository;
 import backend.service.MenuService;
 import backend.util.DtoConversion;
 import backend.util.GetterUtil;
 import backend.util.ValidationUtil;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,6 +23,7 @@ import java.util.stream.Collectors;
 @Service
 public class MenuServiceImpl implements MenuService {
 
+    private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
     private final MenuRepository menuRepository;
     private final ItemRepository itemRepository;
     private final RestaurantRepository restaurantRepository;
@@ -54,6 +53,7 @@ public class MenuServiceImpl implements MenuService {
                 menu = menuOptional.get();
                 isUpdating = true;
             } else {
+                logger.error("Menu not found");
                 throw new NullPointerException("Menu not found");
             }
         } else {
@@ -103,6 +103,7 @@ public class MenuServiceImpl implements MenuService {
             throw new NullPointerException("Restaurant not found");
         }
 
+        logger.info("Saved menu with name: " + menu.getName() + " to restaurant: " + menu.getRestaurant().getName());
         return dtoConversion.convertMenu(menuRepository.save(menu));
     }
 
@@ -135,8 +136,11 @@ public class MenuServiceImpl implements MenuService {
         if (menuOptional.isPresent()){
             Menu menu = menuOptional.get();
             menu.setDeleted(true);
+
+            logger.info("Deleted menu with id: " + id);
             return dtoConversion.convertMenu(menuRepository.save(menu));
         } else {
+            logger.error("Menu not found");
             throw new NullPointerException("Menu not found");
         }
     }

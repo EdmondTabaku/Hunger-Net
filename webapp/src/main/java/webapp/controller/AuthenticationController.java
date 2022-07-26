@@ -55,11 +55,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<?> saveClient(@RequestBody ClientDto clientDto){
-        try {
-            return ResponseEntity.ok(userService.saveClient(clientDto, null));
-        }catch (CustomRequestException e){
-            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
-        }
+        return ResponseEntity.ok(userService.saveClient(clientDto, null));
 
     }
 

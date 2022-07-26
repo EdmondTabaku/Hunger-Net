@@ -54,7 +54,7 @@ public class OrderController {
 
     }
 
-    @GetMapping("/{status}")
+    @GetMapping("/status/{status}")
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     public ResponseEntity<?> findAllByStatus(@PathVariable(name = "status") String orderStatus,HttpServletRequest request){
 
@@ -67,6 +67,14 @@ public class OrderController {
     public ResponseEntity<?> findById(@PathVariable(name = "id") Integer orderId,HttpServletRequest request){
 
         return ResponseEntity.ok(orderService.findById(orderId, getterUtil.getUsernameFromRequest(request)));
+
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    public ResponseEntity<?> delete(@PathVariable(name = "id") Integer orderId,HttpServletRequest request){
+
+        return ResponseEntity.ok(orderService.delete(orderId, getterUtil.getUsernameFromRequest(request)));
 
     }
 

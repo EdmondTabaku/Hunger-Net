@@ -11,6 +11,8 @@ import backend.repository.OrderRepository;
 import backend.repository.OrderedItemRepository;
 import backend.service.OrderedItemService;
 import backend.util.DtoConversion;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +23,7 @@ import java.util.Optional;
 @Service
 public class OrderedItemServiceImpl implements OrderedItemService {
 
+    private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
     private final OrderedItemRepository orderedItemRepository;
     private final ItemRepository itemRepository;
     private final OrderRepository orderRepository;
@@ -43,6 +46,7 @@ public class OrderedItemServiceImpl implements OrderedItemService {
             if (orderedItemOptional.isPresent()){
                 orderedItem = orderedItemOptional.get();
             }else {
+                logger.error("Ordered Item not found");
                 throw new NullPointerException("Ordered item not found");
             }
         }else {
@@ -86,6 +90,7 @@ public class OrderedItemServiceImpl implements OrderedItemService {
             throw new InvalidRequestException("Item id or Order id is invalid");
         }
 
+        logger.info("Added item " + orderedItem.getItem().getName() + " to order with id: " + orderedItem.getOrder().getId());
         return dtoConversion.convertOrderedItem(orderedItemRepository.save(orderedItem));
     }
 

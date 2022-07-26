@@ -1,7 +1,10 @@
 package backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class OrderDetailDto {
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Integer id;
     private String status;
     private String paymentMethod;

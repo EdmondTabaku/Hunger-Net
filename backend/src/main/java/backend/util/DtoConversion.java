@@ -240,6 +240,10 @@ public class DtoConversion {
             itemDto.setPrice(item.getPrice());
         }
 
+        if (item.getMenu() != null){
+            itemDto.setMenuId(item.getMenu().getId());
+        }
+
         return itemDto;
     }
 }
